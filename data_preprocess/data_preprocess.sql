@@ -63,12 +63,12 @@ if exists(select * from sysobjects where xtype='tf' and name='Fun_splitString')
 	drop function Fun_splitString
 go
 
-CREATE FUNCTION Fun_splitString(@s varchar(max))
-returns @t table (string varchar(100))
+CREATE FUNCTION Fun_splitString(@s nvarchar(max))
+returns @t table (string nvarchar(100))
 as
 begin
-	declare @restStr varchar(MAX)
-	declare @firstStr varchar(100)
+	declare @restStr nvarchar(MAX)
+	declare @firstStr nvarchar(100)
 	set @restStr = @s+'|'
 	while (len(@restStr)>0)
 	begin
