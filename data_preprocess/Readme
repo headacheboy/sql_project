@@ -1,0 +1,24 @@
+适用于sql server
+将movies，ratings，tags从csv文件中导入时使用了ssms自带的可视化工具（新建一个DataMining数据库，右键DataMining数据库，任务->导入平面文件）。
+在勾选主键以及选择字段类型的时候参照下面的表结构：
+movies(movieId int primary key, title nvarchar(MAX), genres nvarchar(MAX))
+ratings(userId int, movieId int, rating float, timestamp int primary key(userId, movieId))
+tags(userId int, movieId int, tag nvarchar(100), timestamp int)
+
+然后运行data_preprocess.sql，得到：
+
+tags和ratings各增加了一个times列，是datetime类型的数据
+
+movies_year(movieId int primary key, title nvarchar(max), pub_date int)
+movies_genres(movieId int, genres nvarchar(100))
+
+是movies表拆分出的两个表
+
+movies_index(movieId int, ind int)是将movieId从不连续转为连续的表
+users_index(userId int, ind int)是将userId从不连续转为连续的表
+
+users_movie(users_ind int, movies_ind int, rating float primary key(users_ind, movies_ind))
+是用户_电影矩阵
+
+users_relation(userId1 int, userId2 int, similarity float primary key(userId1, userId2))
+是用户相似度矩阵
