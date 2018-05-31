@@ -19,7 +19,7 @@ update ratings set times = dateadd(second, timestamp, '1970-01-01 00:00:00')
 if exists( select * from sysobjects where id=object_id('movies_year') )
 	drop table movies_year
 
-create table movies_year(movieId int primary key, title varchar(MAX), pub_date int)
+create table movies_year(movieId int primary key, title nvarchar(MAX), pub_date int)
 
 if exists(select * from sysobjects where xtype='fn' and name='Fun_GetNumPart')
 	drop function Fun_GetNumPart
@@ -31,7 +31,7 @@ AS
 BEGIN   
     if PATINDEX('%(19[0-9][0-9])%',@Str)>0   
     BEGIN   
-        SET @Str=substring(@str, patindex('%(19[0-9][0-9])%', @str)+1, 4) --É¾µô·ÇÊý×ÖµÄ×Ö·û
+        SET @Str=substring(@str, patindex('%(19[0-9][0-9])%', @str)+1, 4) --åˆ æŽ‰éžæ•°å­—çš„å­—ç¬¦
     END   
 	else if patindex('%(20[0-9][0-9])%', @Str) > 0
 	BEGIN
@@ -57,7 +57,7 @@ insert into movies_year
 if exists( select * from sysobjects where id=object_id('movies_genres'))
 	drop table movies_genres
 
-create table movies_genres(movieId int, genres varchar(100))
+create table movies_genres(movieId int, genres nvarchar(100))
 
 if exists(select * from sysobjects where xtype='tf' and name='Fun_splitString')
 	drop function Fun_splitString
@@ -99,7 +99,7 @@ alter table users_index add constraint users_ind_key primary key(userId)
 
 if exists( select * from sysobjects where id=object_id('users_movies') )
 	drop table users_movies
-create table users_movies(users_ind int, movies_ind int, rating float)
+create table users_movies(users_ind int, movies_ind int, rating float primary key(users_ind, movies_ind))
 
 
 insert into users_movies
