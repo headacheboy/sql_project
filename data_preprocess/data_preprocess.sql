@@ -116,11 +116,41 @@ if exists( select * from sysobjects where id=object_id('users_relation') )
 	drop table users_relation
 create table users_relation(userId1 int, userId2 int, similarity float primary key(userId1, userId2))
 
+if exists( select * from sysobjects where id=object_id('twoNorm') )
+	drop table twoNorm
+create table twoNorm(userId int primary key, s float)
+
+insert into twoNorm
+	select userId, sum(rating*rating) sq from ratings group by userId
+
+go
+
+if exists( select * from sysobjects where id=object_id('userNum') )
+	drop table userNum
+create table userNum(userId int primary key, s int)
+
+insert into userNum
+	select userId, count(userId) number from ratings group by userId
+
+if exists(select * from sysobjects where xtype='tf' and name='selectTOP10')
+	drop function selectTOP10
+go
+CREATE FUNCTION selectTOP10(@i int)
+returns @t table (ind1 int, ind2 int, sim float)
+as
+begin
+	insert into @t
+	select top 10 r1.userId id1, r2.userId id2, sum(r1.rating*r2.rating)/((select s from twoNorm where userId=r2.userId)*(select s from twoNorm where userId=r1.userId)) s from ratings r1, ratings r2
+	where r1.userId=@i and r2.userId != r1.userId and r1.movieId = r2.movieId and r1.rating=r2.rating and (select s from userNum where r2.userId=userNum.userId) > 4000
+	group by r1.userId, r2.userId
+	order by s desc
+	return
+end
+go 
+
 insert into users_relation
-select r4.id1, r4.id2, s/(r3.sq*r5.sq) from
-(select r1.userId id1, r2.userId id2, sum(r1.rating*r2.rating) s from ratings r1, ratings r2
-where r1.userId < r2.userId and r1.movieId = r2.movieId
-group by r1.userId, r2.userId) r4, (select userId, sum(rating*rating) sq from ratings group by userId) r3, (select userId, sum(rating*rating) sq from ratings group by userId) r5
-where r3.userId=r4.id1 and r5.userId=r4.id2
+select ind1, ind2, sim from (select distinct userId from ratings where (select s from userNum where ratings.userId=userNum.userId) > 4000) as A cross apply selectTOP10(A.userId) as B
+
+--select * from users_relation order by userId1
 
 -- user_relation matrix
