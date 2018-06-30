@@ -70,6 +70,7 @@ def getRecByMovieSim(algo, user_id):
     inner_ids = [algo.trainset.to_inner_iid(movie_index[0]) for movie_index in movies_index]
     neighbors = [algo.get_neighbors(inner_id, 5) for inner_id in inner_ids]
     rec_raw_ids = [algo.trainset.to_raw_iid(id) for id_list in neighbors for id in id_list]
+    rec_raw_ids = list(set(rec_raw_ids))
 
     for id in rec_raw_ids:
         hasViewed = crsr.execute("select * from users_movies um, users_index ui \
@@ -102,6 +103,7 @@ def getRecByUserSim(user_id):
             " order by rating desc").fetchall()
             for movie in user_movie:
                 rec_raw_ids.append(movie[0])
+        rec_raw_ids = list(set(rec_raw_ids))
         for id in rec_raw_ids:
             hasViewed = crsr.execute("select * from users_movies um, users_index ui \
                 where um.users_ind = ui.ind \
